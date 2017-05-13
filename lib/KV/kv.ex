@@ -1,6 +1,6 @@
-defmodule OtpKvStore do
+defmodule KV do
   @moduledoc """
-  Documentation for OtpKvStore.
+  Documentation for KV.
   """
 
   @doc """
@@ -8,7 +8,7 @@ defmodule OtpKvStore do
 
   ## Examples
 
-      iex> OtpKvStore.hello
+      iex> KV.hello
       :world
 
   """
