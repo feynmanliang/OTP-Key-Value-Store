@@ -11,6 +11,10 @@ defmodule KV.Supervisor do
       supervisor(KV.Bucket.Supervisor, [])
     ]
 
-    supervise(children, strategy: :one_for_one)
+    # since bucket supervisors started after registry,
+    # `rest_for_one` will allow registry to clean up after bucket supervisor failure
+    # but will restart all bucket supervisors when registry fails, preventing orphaning
+    # (dead registry => impossible to look up pid for a bucket name)
+    supervise(children, strategy: :rest_for_one)
   end
 end
