@@ -19,6 +19,8 @@ defmodule KV.RegistryTest do
 
     Agent.stop(bucket)
 
+    # bogus call to ensure registry processed the DOWN Message
+    _ = KV.Registry.create(registry, "bogus")
     assert KV.Registry.lookup(registry, "groceries") == :error
   end
 
@@ -32,6 +34,8 @@ defmodule KV.RegistryTest do
     # wait until bucket is dead, because (unlike Agent.stop) Process.exit is async
     assert_receive {:DOWN, ^ref, _, _, _}
 
+    # bogus call to ensure registry processed the DOWN Message
+    _ = KV.Registry.create(registry, "bogus")
     assert KV.Registry.lookup(registry, "groceries") == :error
   end
 end
