@@ -5,7 +5,7 @@ defmodule KV.Registry do
 
   @doc "Starts the registry mapping string names to buckets."
   def start_link(name) do
-    GenServer.start_link(__MODULE__, :ok, name: name)
+    GenServer.start_link(__MODULE__, name, name: name)
   end
 
   @doc """
@@ -14,7 +14,10 @@ defmodule KV.Registry do
   Returns `{:ok, pid}` if the bucket exists, `:error` otherwise.
   """
   def lookup(server, name) do
-    GenServer.call(server, {:lookup, name})
+    case :ets.lookup(server, name) do
+      [{^name, pid}] -> {:ok, pid}
+      [] -> :error
+    end
   end
 
   @doc "Ensures there is a bucket associated to the given `name` in `server`."
@@ -29,31 +32,29 @@ defmodule KV.Registry do
 
   ## Server callbacks
 
-  def init(:ok) do
-    names = Map.new # name -> bucket pid, to resolve buckets by name
+  def init(table) do
+    # name -> bucket pid, to resolve buckets by name
+    names = :ets.new(table, [:named_table, read_concurrency: true])
     refs = Map.new # ref -> name, to handle Monitor messages
     {:ok, {names, refs}}
   end
 
-  def handle_call({:lookup, name}, _from, {names, _} = state) do
-    {:reply, Map.fetch(names, name), state}
-  end
-
   def handle_call({:create, name}, _from, {names, refs}) do
-    if Map.has_key?(names, name) do
-      {:reply, :ok, {names, refs}}
-    else
-      {:ok, bucket} = KV.Bucket.Supervisor.start_bucket
-      ref = Process.monitor(bucket)
-      refs = Map.put(refs, ref, name)
-      names = Map.put(names, name, bucket)
-      {:reply, :ok, {names, refs}}
+    case lookup(names, name) do
+      {:ok, pid} ->
+        {:reply, pid, {names, refs}}
+      :error ->
+        {:ok, pid} = KV.Bucket.Supervisor.start_bucket
+        ref = Process.monitor(pid)
+        refs = Map.put(refs, ref, name)
+        :ets.insert(names, {name, pid})
+        {:reply, pid, {names, refs}}
     end
   end
 
   def handle_info({:DOWN, ref, :process, _pid, _reason}, {names, refs}) do
     {name, refs} = Map.pop(refs, ref)
-    names = Map.delete(names, name)
+    :ets.delete(names, name)
     {:noreply, {names, refs}}
   end
 
