@@ -1,6 +1,7 @@
 defmodule KV.RouterTest do
   use ExUnit.Case, async: true
 
+  @tag :distributed
   test "route requests across nodes" do
     {:ok, hostname} = :inet.gethostname
 
