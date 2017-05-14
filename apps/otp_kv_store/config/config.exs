@@ -28,3 +28,9 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env}.exs"
+
+{:ok, hostname} = :inet.gethostname
+
+config :otp_kv_store, :routing_table,
+  [{?a..?m, :"foo@#{hostname}"},
+   {?n..?z, :"bar@#{hostname}"}]

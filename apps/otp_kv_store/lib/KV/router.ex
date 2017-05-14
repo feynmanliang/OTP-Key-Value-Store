@@ -25,8 +25,6 @@ defmodule KV.Router do
 
   @doc "The routing table."
   def table do
-    {:ok, hostname} = :inet.gethostname
-    [{?a..?m, :"foo@#{hostname}"},
-     {?n..?z, :"bar@#{hostname}"}]
+    Application.fetch_env!(:otp_kv_store, :routing_table)
   end
 end
