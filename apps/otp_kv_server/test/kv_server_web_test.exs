@@ -1,6 +1,7 @@
 defmodule KVServer.WebTest do
   use ExUnit.Case
   use Plug.Test
+  @moduletag :capture_log
 
   alias KVServer.Web
 
