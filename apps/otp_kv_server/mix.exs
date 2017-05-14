@@ -19,8 +19,9 @@ defmodule KVServer.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     # Specify extra applications you'll use from Erlang/Elixir
-    [extra_applications: [:logger],
-     mod: {KVServer.Application, []}]
+    [extra_applications: [:cowboy, :logger, :plug],
+     mod: {KVServer.Api, []},
+     env: [cowboy_port: 8080]]
   end
 
   # Dependencies can be Hex packages:
@@ -38,6 +39,7 @@ defmodule KVServer.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [{:otp_kv_store, in_umbrella: true},
-     {:plug, "~> 1.0"}]
+     {:plug, "~> 1.0"},
+     {:cowboy, "~> 1.0.3"}]
   end
 end

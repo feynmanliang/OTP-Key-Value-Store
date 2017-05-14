@@ -1,6 +1,6 @@
 defmodule KVServerTest do
   use ExUnit.Case
-  doctest KVServer
+  doctest KVServer.Api
 
   test "the truth" do
     assert 1 + 1 == 2
